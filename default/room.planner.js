@@ -2,6 +2,8 @@
 
 var roomInitialPlan = function(room){
     
+    var cpu = Game.cpu.getUsed();
+    
     const sources = room.find(FIND_SOURCES);
     const spawns = room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_SPAWN}});
     
@@ -15,8 +17,12 @@ var roomInitialPlan = function(room){
         
     }
     
+    if(!Memory.cpuTotal) Memory.cpuTotal = 0, Memory.cpuTicks = 0;
     
+    Memory.cpuTotal += Game.cpu.getUsed() - cpu;
+    Memory.cpuTicks++;
     
+    Memory.cpuAvg = Memory.cpuTotal / Memory.cpuTicks;
 };
 
 /*
