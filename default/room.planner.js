@@ -1,5 +1,4 @@
 
-
 var roomInitialPlan = function(room){
     
     var cpu = Game.cpu.getUsed();
@@ -17,18 +16,28 @@ var roomInitialPlan = function(room){
         
     }
     
+    /*
     if(!Memory.cpuTotal) Memory.cpuTotal = 0, Memory.cpuTicks = 0;
     
     Memory.cpuTotal += Game.cpu.getUsed() - cpu;
     Memory.cpuTicks++;
     
     Memory.cpuAvg = Memory.cpuTotal / Memory.cpuTicks;
+    */
 };
 
 /*
     First Base
 */ 
 var firstBasePlan = function(room, sources, spawn){
+    
+    //Clear out previous Memory
+    for (var name in Game.rooms){
+        if (name != room.name){
+            delete Memory.rooms[name];
+        }
+    }
+    
     //Store all slots adjacent to source
     var sourceAdjacentSquares = [];
     const terrain = new Room.Terrain(room.name);
@@ -51,10 +60,22 @@ var firstBasePlan = function(room, sources, spawn){
         var groups = makeAdjacentsGroups(sourcePos, sourceAdjacents);
         
         sourceAdjacentSquares.push(sourceAdjacents);
+        
     }
     
     
     if(sources.length == 2){
+        planClaimedRoomRoads(room, sources, spawn);
+    }
+};
+
+var makeAdjacentsGroups = function(sourcePos, adjacentSquares){
+    
+}
+
+var planClaimedRoomRoads = function(room, sources, spawn){
+    
+       const controllerPos = room.controller.pos;
        var source1Path = PathFinder.search(sources[0].pos, {pos: controllerPos, range: 3}, {maxRooms: 1});
        var source2Path = PathFinder.search(sources[1].pos, {pos: controllerPos, range: 3}, {maxRooms: 1});
     
@@ -62,39 +83,43 @@ var firstBasePlan = function(room, sources, spawn){
        if(source1Path.cost >= source2Path.cost){
            room.memory.upgraderSource = sources[1].id;
            room.memory.upgraderPath = source2Path.path;
+           room.memory.upgraderContainer = 1;
        }
        else{
            room.memory.upgraderSource = sources[0].id;
            room.memory.upgraderPath = source1Path.path;
+           room.memory.upgraderContainer = 0;
        }
-       
-       room.memory.initialUpgradeContainerPosition = room.memory.upgraderPath[0];
        
        //Just making road within one range of dest..
        room.memory.upgraderPath.shift(); 
-       room.memory.upgraderPath.pop();
        
+       room.memory.sourcePaths = [];
+       var source1Path = PathFinder.search(sources[0].pos, {pos: spawn.pos, range: 1}, {maxrooms: 1});
+       var source2Path = PathFinder.search(sources[1].pos, {pos: spawn.pos, range: 1}, {maxrooms: 1});
        
-       source1Path = PathFinder.search(sources[0].pos, {pos: spawn.pos, range: 1}, {maxrooms: 1});
-       source2Path = PathFinder.search(sources[1].pos, {pos: spawn.pos, range: 1}, {maxrooms: 1});
+       //Store paths to use later
+       room.memory.sourcePaths[0] = source1Path.path;
+       room.memory.sourcePaths[1] = source2Path.path;
        
        //pick source for spawn
        if(source1Path.cost >= source2Path.cost){
-           room.memory.harvesterSoure = sources[1].id;
-           room.memory.harvesterPath = source2Path.path;
+           room.memory.harvesterSource = sources[1].id;
+           room.memory.harvesterPath = 1;
        }
        else{
-           room.memory.harvesterSoure = sources[0].id;
-           room.memory.harvesterPath = source1Path.path;
+           room.memory.harvesterSource = sources[0].id;
+           room.memory.harvesterPath = 0;
        }
        
+       //Containers for static harvesters to dump into
+       room.memory.containers = [];
+       room.memory.containerPositions = [room.memory.sourcePaths[0][0], room.memory.sourcePaths[1][0]];
+       
        //If we're harvesting, no need to have road at it..
-       room.memory.harvesterPath.pop();
-    }
-};
-
-var makeAdjacentsGroups = function(sourcePos, adjacentSquares){
-    
+       room.memory.sourcePaths[0].shift();
+       room.memory.sourcePaths[1].shift();
+       
 }
 
 /*
@@ -113,6 +138,8 @@ var buildRoadFromPath = function(path, room){
     construction sites from that room, else kills all construction sites
 */
 var clearConstructionSites = function(room){
+    if(!room) console.log('Caution! Removing all construction sites');
+    
     for(var name in Game.constructionSites){
         if(room && room.name == Game.constructionSites[name].room.name)
             Game.constructionSites[name].remove();
