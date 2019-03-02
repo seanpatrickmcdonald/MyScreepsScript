@@ -3,9 +3,19 @@ var buildRoadFromPath = require('room.planner').buildRoadFromPath;
 
 var visualOpacity = 0.0625;
 
+const extensionPositions = {
+    2:    [{dx: 1, dy: 1}, {dx: 1, dy: -1}, {dx: -1, dy: -1}, {dx: 2, dy: 0}, {dx: 2, dy: -1}],
+    3:    []
+};
+
 var room = {
     update : function(room){
         if(!room.initialLayout) roomInitialPlan(room);
+        
+            if(!Memory.rooms)
+                Memory.rooms = {};
+            if(!Memory.rooms[room.name])
+                Memory.rooms[room.name] = {};        
         
             var sources = [];
             for(var cursor = 0; cursor < room.memory.sources.length; cursor++) {
@@ -18,21 +28,36 @@ var room = {
                 
             }
     
+        if(!room.memory.level) room.memory.level = room.controller.level;
+        //If controller level changed
+        else if (room.controller.level != room.memory.level);
+        room.memory.level = room.controller.level;
     
         drawRoomPaths(room);
+        drawContainerLocations(room);
         drawControllerRange(room.controller);
     }
 };
 
 
 
+var newLevelUpdate = {
+  2 : function(room){
+      const spawn = room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_SPAWN}});
+      
+      for(var index = 0; index < 5; index++)
+      room.createConstructionSite(spawn.pos.x + extensionPositions[2].dx,
+          spawn.pos.y + extensionPositions[0].dy, STRUCTURE_EXTENSION);
+  }  
+};
+
+
 var drawRoomPaths = function(room){
     if(!room) return;
     
-    if(!room.memory.builtUpgradePath)
-        drawRoadPath(room.memory.upgraderPath);
-    if(!room.memory.builtHarvesterPath)
-        drawRoadPath(room.memory.harvesterPath);
+    drawRoadPath(room.memory.upgraderPath);
+    drawRoadPath(room.memory.sourcePaths[0]);
+    drawRoadPath(room.memory.sourcePaths[1]);
 }
 
 var drawRoadPath = function(path){
@@ -44,8 +69,13 @@ var drawRoadPath = function(path){
                                               {opacity: visualOpacity*2})
 }
 
+var drawContainerLocations = function(room){
+    room.visual.circle(room.memory.containerPositions[0], {radius: 0.4, fill: '#FFFF00', opacity: visualOpacity*4});
+    room.visual.circle(room.memory.containerPositions[1], {radius: 0.4, fill: '#FFFF00', opacity: visualOpacity*4});
+}
+
 var drawControllerRange = function(controller){
-    controller.room.visual.circle(controller.pos, {radius: 3, opacity : visualOpacity});
+    controller.room.visual.circle(controller.pos, {radius: 3, opacity: visualOpacity});
 }
 
 module.exports = room;
