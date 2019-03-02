@@ -38,6 +38,9 @@ var firstBasePlan = function(room, sources, spawn){
         }
     }
     
+    //Spawn memory
+    room.memory.spawns = [spawn.id];
+    
     //Store all slots adjacent to source
     var sourceAdjacentSquares = [];
     const terrain = new Room.Terrain(room.name);
