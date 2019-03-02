@@ -1,6 +1,9 @@
 var roomInitialPlan = require('room.planner').roomInitialPlan;
 var buildRoadFromPath = require('room.planner').buildRoadFromPath;
 
+var CreepBase = require('creep');
+
+
 var visualOpacity = 0.0625;
 
 const extensionPositions = {
@@ -27,7 +30,6 @@ var room = {
                 
                 
             }
-    
         if(!room.memory.level) room.memory.level = room.controller.level;
         //If controller level changed
         else if (room.controller.level != room.memory.level);
