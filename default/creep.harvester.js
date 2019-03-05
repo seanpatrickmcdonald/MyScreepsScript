@@ -35,6 +35,36 @@ var harvester = {
                 return (structureType == STRUCTURE_CONTAINER || structureType == STRUCTURE_STORAGE) && 
                     object.store[RESOURCE_ENERGY] < object.storeCapacity;
             }});
+            
+        if(storage){
+            creep.memory.task = storage.id;
+            creep.memory.taskAction = 'FILL_CONT';
+            return;
+        }
+        
+        //Search for build target if we have nothing to fill
+        const build = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+        
+        if(build){
+            creep.memory.task = build.id;
+            creep.memory.taskAction = 'BUILD';
+            return;
+        }
+        
+        creep.memory.taskAction = 'IDLE';
+    },
+    
+    findEnergy: function(creep){
+        if(!creep.memory.taskAction || creep.memory.taskAction === 'IDLE') return;
+        
+        var storage_energy_found = false;
+        if(creep.memory.taskAction === 'FILL_SPAWN' || creep.memory.taskAction === 'BUILD'){
+            
+        }
+    },
+    
+    isTaskComplete: function(creep){
+        
     }
 };
 
