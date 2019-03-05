@@ -39,6 +39,10 @@ var room = {
         drawRoomPaths(room);
         drawContainerLocations(room);
         drawControllerRange(room.controller);
+    },
+    
+    run : function(room){
+        
     }
 };
 
