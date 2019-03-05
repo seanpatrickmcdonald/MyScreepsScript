@@ -37,16 +37,15 @@ var firstBasePlan = function(room, sources, spawn){
             delete Memory.rooms[name];
         }
     }
-    
     //Spawn memory
     room.memory.spawns = [spawn.id];
     
     //Store all slots adjacent to source
-    var sourceAdjacentSquares = [];
+    //var sourceAdjacentSquares = [];
     const terrain = new Room.Terrain(room.name);
     const controllerPos = room.controller.pos;
-    for(var name in sources){
-        var source = sources[name];
+    for(var i = 0; i < 2; i++){
+        var source = sources[i];
         var sourceAdjacents = [];
         var sourcePos = {x: source.pos.x, y:source.pos.y};
         
@@ -60,11 +59,13 @@ var firstBasePlan = function(room, sources, spawn){
             }
         }
         
-        var groups = makeAdjacentsGroups(sourcePos, sourceAdjacents);
+        source.memory = source.memory || {};
+        source.memory.numberAdjacentPositions = sourceAdjacents.length;
         
-        sourceAdjacentSquares.push(sourceAdjacents);
-        
+        //var groups = makeAdjacentsGroups(sourcePos, sourceAdjacents);
+        //sourceAdjacentSquares.push(sourceAdjacents);
     }
+    
     
     
     if(sources.length == 2){

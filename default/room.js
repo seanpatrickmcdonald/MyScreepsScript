@@ -30,9 +30,10 @@ var room = {
                 
                 
             }
-        if(!room.memory.level) room.memory.level = room.controller.level;
+        var room_level = room.controller.level;
+        room.memory.level = room.memory.level || room_level;
         //If controller level changed
-        else if (room.controller.level != room.memory.level);
+        if (room_level != room.memory.level) levelUpgraded[room_level(room)];
         room.memory.level = room.controller.level;
     
         drawRoomPaths(room);
@@ -43,7 +44,7 @@ var room = {
 
 
 
-var newLevelUpdate = {
+var levelUpgraded = {
   2 : function(room){
       const spawn = room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_SPAWN}});
       
